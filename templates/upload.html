@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload and Display Images</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Загрузить фото</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="file" id="fileInput">
+            <input type="submit" value="Загрузить">
+        </form>
+        <p id="successMessage" class="success-message" style="display: none;">Успешно добавлено!</p>
+
+        <div class="gallery">
+            {% for image in images %}
+            <div class="card">
+                <img src="{{ url_for('static', filename='uploads/' + image) }}" alt="Image">
+                <div class="card-content">
+                    <h3>Загруженное изображение</h3>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').onsubmit = function(event) {
+            event.preventDefault();
+            const formData = new FormData();
+            const fileInput = document.getElementById('fileInput');
+            formData.append('file', fileInput.files[0]);
+
+            fetch("/", {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const successMessage = document.getElementById('successMessage');
+                    successMessage.style.display = 'block';
+                    successMessage.innerText = 'Успешно добавлено!';
+                    fileInput.value = ''; // Очистка поля выбора файла
+                    // Перезагрузка страницы для отображения нового изображения
+                    location.reload();
+                }
+            })
+            .catch(error => console.error('Ошибка:', error));
+        };
+    </script>
+</body>
+</html>
